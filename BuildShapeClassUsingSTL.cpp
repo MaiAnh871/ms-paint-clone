@@ -359,12 +359,32 @@ void showShape (vector <Shape*> &Shape_List)
     }
     else
     {
+        cout << endl << endl;
         for (i = 0; i < Shape_List.size(); i++)
         {
-            cout << endl << endl << "Shape " << i + 1 << ":" << endl;
+            cout << "Shape " << i + 1 << ":" << endl;
             Shape_List[i]->print();
             cout << endl;
         }
+    }
+};
+
+// Compare two Shape based on its distance
+bool compareDistance (Shape* &Shape1, Shape* &Shape2)
+{
+    return Shape1->calDistance() < Shape2->calDistance();
+};
+
+// Sort the list based on the distance from the object to the origin (Increasing)
+void sortShape (vector <Shape*> Shape_List)
+{
+    sort (Shape_List.begin(), Shape_List.end(), compareDistance);
+    cout << endl << endl << "The list after sorting is: " << endl;
+    for (int i = 0; i < Shape_List.size(); i++)
+    {
+        cout << "Shape " << i + 1 << ":" << endl;
+        Shape_List[i]->print();
+        cout << endl;
     }
 };
 
@@ -410,6 +430,10 @@ class Graph
 
                     case 2:
                         showShape (ShapeList);
+                        break;
+
+                    case 3:
+                        sortShape (ShapeList);
                         break;
 
                     default:
