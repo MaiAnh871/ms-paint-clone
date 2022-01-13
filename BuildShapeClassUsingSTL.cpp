@@ -8,6 +8,7 @@
 #include <conio.h>
 
 #define pi 3.14
+#define outFile "textfile.txt"
 
 using namespace std;
 
@@ -73,6 +74,11 @@ class Shape
             cout << "Position of this shape: x = " << pos_x << "; y = " << pos_y << endl;
             cout << "Distance from 0 to this shape: " << calDistance() << endl;
         };
+
+        // Write data to file
+        virtual void writeFile (ofstream &file)
+        {
+        };
 };
 
 
@@ -112,6 +118,18 @@ class Circle: public Shape
             cout << "Radius of this shape: " << radius << endl;
             cout << "Area of this shape: " << Circle::calArea() << endl;
         };
+    
+        // Write Circle data to file in JSON
+        void writeFile (ofstream &file)
+        {
+            file << "        {" << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
+            file << "            \"type\": \"Circle\"," << endl;
+            file << "            \"pos_x\": " << pos_x << "," << endl;
+            file << "            \"pos_y\": " << pos_y << "," << endl;
+            file << "            \"radius\": " << radius << endl;
+            file << "        }," << endl;
+        };
 
 };
 
@@ -150,6 +168,18 @@ class Square: public Shape
             Shape::print();
             cout << "Edge of this shape: " << edge << endl;
             cout << "Area of this shape: " << Square::calArea() << endl;
+        };
+
+        // Write Square data to file in JSON
+        void writeFile (ofstream &file)
+        {
+            file << "        {" << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
+            file << "            \"type\": \"Square\"," << endl;
+            file << "            \"pos_x\": " << pos_x << "," << endl;
+            file << "            \"pos_y\": " << pos_y << "," << endl;
+            file << "            \"edge\": " << edge << endl;
+            file << "        }," << endl;
         };
 };
 
@@ -192,6 +222,19 @@ class Rectangle: public Shape
             cout << "Width of this shape: " << width << endl;
             cout << "Area of this shape: " << Rectangle::calArea() << endl;
         };
+
+         // Write Rectangle data to file in JSON
+        void writeFile (ofstream &file)
+        {
+            file << "        {" << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
+            file << "            \"type\": \"Rectangle\"," << endl;
+            file << "            \"pos_x\": " << pos_x << "," << endl;
+            file << "            \"pos_y\": " << pos_y << "," << endl;
+            file << "            \"length\": " << length << "," << endl;
+            file << "            \"width\": " << width << endl;
+            file << "        }," << endl;
+        };
 };
 
 // Declare derived class: Triangle
@@ -233,6 +276,19 @@ class Triangle: public Shape
             cout << "Height of this shape: " << height << endl;
             cout << "Area of this shape: " << Triangle::calArea() << endl;
         };
+
+        // Write Triangle data to file in JSON
+        void writeFile (ofstream &file)
+        {
+            file << "        {" << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
+            file << "            \"type\": \"Triangle\"," << endl;
+            file << "            \"pos_x\": " << pos_x << "," << endl;
+            file << "            \"pos_y\": " << pos_y << "," << endl;
+            file << "            \"bottom\": " << bottom << "," << endl;
+            file << "            \"height\": " << height << endl;
+            file << "        }," << endl;
+        };
 };
 
 // Declare derived class: Ellipse
@@ -273,6 +329,19 @@ class Ellipse: public Shape
             cout << "Minor of this shape: " << minor << endl;
             cout << "Major of this shape: " << major << endl;
             cout << "Area of this shape: " << Ellipse::calArea() << endl;
+        };
+
+        // Write Ellipse data to file in JSON
+        void writeFile (ofstream &file)
+        {
+            file << "        {" << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
+            file << "            \"type\": \"Ellipse\"," << endl;
+            file << "            \"pos_x\": " << pos_x << "," << endl;
+            file << "            \"pos_y\": " << pos_y << "," << endl;
+            file << "            \"minor\": " << minor << "," << endl;
+            file << "            \"major\": " << major << endl;
+            file << "        }," << endl;
         };
 };
 
@@ -388,6 +457,17 @@ void sortShape (vector <Shape*> Shape_List)
     }
 };
 
+// Write the list to file in JSON
+void writeShape (ofstream &file, vector <Shape*> Shape_List)
+{
+    file << "{" << endl << "    \"shape\": [" << endl;
+    for (int i = 0; i < Shape_List.size(); i++)
+    {
+        Shape_List[i]->writeFile(file);
+    }
+    file << "    ]" << endl << "}";
+}
+
 class Graph
 {
     protected:
@@ -417,8 +497,8 @@ class Graph
                 cout << "1. Enter a Shape." << endl;
                 cout << "2. Show list of Shape." << endl;
                 cout << "3. Sort the Shape list depend on distance." << endl;
-                cout << "4. Get Shape from file." << endl;
-                cout << "5. Write Shape into file." << endl;
+                cout << "4. Write Shape into file." << endl;
+                cout << "5. Get Shape from file" << endl;
                 cout << "6. Exit!" << endl;
                 cout << "Input your select: ";
                 cin >> choice;
@@ -435,6 +515,16 @@ class Graph
                     case 3:
                         sortShape (ShapeList);
                         break;
+
+                    case 4:
+                    {
+                        ofstream fileOut;
+                        fileOut.open (outFile, ios::out);
+                        writeShape (fileOut, ShapeList);
+                        fileOut.close();
+                        cout << "Successfully write file!" << endl;
+                        break;
+                    }
 
                     default:
                         cout << "Enter number from 1 to 6!" << endl;
