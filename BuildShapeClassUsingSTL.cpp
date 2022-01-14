@@ -9,6 +9,7 @@
 
 #define pi 3.14
 #define outFile "textfile.txt"
+#define inFile "data.txt"
 
 using namespace std;
 
@@ -46,6 +47,24 @@ class Shape
             cin >> name;
         };
 
+        virtual void setX (float x)
+        {
+            pos_x = x;
+        }
+
+        virtual void setY (float y)
+        {
+            pos_y = y;
+        }
+
+        virtual void setName (string n)
+        {
+            name = n;
+        }
+
+        virtual void setSize1(float size){}
+
+        virtual void setSize2(float size){}
         /*
         // Overloading operator <<
         friend ostream& operator << (ostream& os, Shape s)
@@ -104,6 +123,12 @@ class Circle: public Shape
             cin >> radius;
         };
 
+        // Circle only has 1 size
+        virtual void setSize1 (float size)
+        {
+            radius = size;
+        }
+       
         // Calculate area of Circle
         float calArea()
         {
@@ -123,8 +148,8 @@ class Circle: public Shape
         void writeFile (ofstream &file)
         {
             file << "        {" << endl;
-            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"type\": \"Circle\"," << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"pos_x\": " << pos_x << "," << endl;
             file << "            \"pos_y\": " << pos_y << "," << endl;
             file << "            \"radius\": " << radius << endl;
@@ -155,6 +180,12 @@ class Square: public Shape
             cin >> edge;
         };
 
+        // Square only has 1 size
+        void setSize1 (float size)
+        {
+            edge = size;
+        }
+
         // Calculate area of Square
         float calArea()
         {
@@ -174,8 +205,8 @@ class Square: public Shape
         void writeFile (ofstream &file)
         {
             file << "        {" << endl;
-            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"type\": \"Square\"," << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"pos_x\": " << pos_x << "," << endl;
             file << "            \"pos_y\": " << pos_y << "," << endl;
             file << "            \"edge\": " << edge << endl;
@@ -207,6 +238,17 @@ class Rectangle: public Shape
             cin >> width;
         };
 
+        // Rectangle has 2 size
+        void setSize1 (float size)
+        {
+            length = size;
+        }
+
+        void setSize2 (float size)
+        {
+            width = size;
+        }
+
         // Calculate area of Rectangle
         float calArea()
         {
@@ -227,8 +269,8 @@ class Rectangle: public Shape
         void writeFile (ofstream &file)
         {
             file << "        {" << endl;
-            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"type\": \"Rectangle\"," << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;           
             file << "            \"pos_x\": " << pos_x << "," << endl;
             file << "            \"pos_y\": " << pos_y << "," << endl;
             file << "            \"length\": " << length << "," << endl;
@@ -261,6 +303,17 @@ class Triangle: public Shape
             cin >> height;
         };
 
+        // Triangle has 2 size
+        void setSize1 (float size)
+        {
+            bottom = size;
+        }
+
+        void setSize2 (float size)
+        {
+            height = size;
+        }
+
         // Calculate area of Triangle
         float calArea()
         {
@@ -281,8 +334,8 @@ class Triangle: public Shape
         void writeFile (ofstream &file)
         {
             file << "        {" << endl;
+            file << "            \"type\": \"Triangle\"," << endl;           
             file << "            \"name\": \"" << name << "\"," << endl;
-            file << "            \"type\": \"Triangle\"," << endl;
             file << "            \"pos_x\": " << pos_x << "," << endl;
             file << "            \"pos_y\": " << pos_y << "," << endl;
             file << "            \"bottom\": " << bottom << "," << endl;
@@ -315,6 +368,17 @@ class Ellipse: public Shape
             cin >> major;
         };
 
+        // Ellipse has 2 size
+        void setSize1 (float size)
+        {
+            minor = size;
+        }
+
+        void setSize2 (float size)
+        {
+            major = size;
+        }
+
         // Calculate area of Ellipse
         float calArea()
         {
@@ -335,8 +399,8 @@ class Ellipse: public Shape
         void writeFile (ofstream &file)
         {
             file << "        {" << endl;
-            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"type\": \"Ellipse\"," << endl;
+            file << "            \"name\": \"" << name << "\"," << endl;
             file << "            \"pos_x\": " << pos_x << "," << endl;
             file << "            \"pos_y\": " << pos_y << "," << endl;
             file << "            \"minor\": " << minor << "," << endl;
@@ -468,11 +532,290 @@ void writeShape (ofstream &file, vector <Shape*> Shape_List)
     file << "    ]" << endl << "}";
 }
 
+// Read the list in JSON
+void readShape (string inputFile, vector <Shape*> &Shape_List)
+{
+    fstream fileIn;
+    string temp, textStr = "";
+    fileIn.open (inputFile, ios::in);
+    
+    if (fileIn.fail()) //
+    {
+        cout << "Cannot read this file!" << endl;
+        return;
+    }
+    while(!fileIn.eof())
+    {
+        getline (fileIn, temp);                    // Read file from beginning to "," then assign it to temp        
+        //cout << temp << endl << endl;
+        textStr = textStr + temp;
+    }
+
+    // Delete edundant text
+    textStr.erase(textStr.begin(), textStr.begin() + 15);
+    textStr.erase(textStr.end() - 6, textStr.end());
+    //cout << textStr << endl;
+
+    int typeIndex1, typeIndex2;                                         // Index to identify type
+    int nameIndex1, nameIndex2, nameSize;                               // Index to identify name
+    string nameTemp, posxTemp, posyTemp, size1Temp, size2Temp;
+    int posxIndex1, posxIndex2, posxSize; 
+    int posyIndex1, posyIndex2, posySize;
+    int size1Index1, size1Index2, size1Size;
+    int size2Index1, size2Index2, size2Size;
+
+    while (textStr != "")
+    {
+        // Identify type
+        typeIndex1 = textStr.find(":");
+        typeIndex2 = textStr.find(",");
+
+        switch (textStr[typeIndex1 + 3])
+        {
+            case 'C':                                                   // Circle
+            {
+                    Shape_List.push_back (FactoryShape::createShape(1));
+
+                    // Identify name
+                    textStr.erase(textStr.begin(), textStr.begin() + typeIndex2 + 1);
+                    nameIndex1 = textStr.find(":");                
+                    nameIndex2 = textStr.find(",");
+                    nameSize = distance (textStr.begin() + nameIndex1 + 3, textStr.begin() + nameIndex2 - 1);
+                    nameTemp = textStr.substr (nameIndex1 + 3, nameSize);
+                    Shape_List.back()->setName(nameTemp);
+
+                    // Identify pos x
+                    textStr.erase(textStr.begin(), textStr.begin() + nameIndex2 + 1);
+                    posxIndex1 = textStr.find(":");                
+                    posxIndex2 = textStr.find(",");
+                    posxSize = distance (textStr.begin() + posxIndex1 + 2, textStr.begin() + posxIndex2);
+                    posxTemp = textStr.substr (posxIndex1 + 2, posxSize);
+                    Shape_List.back()->setX(stof(posxTemp));
+
+                    // Identify pos y
+                    textStr.erase(textStr.begin(), textStr.begin() + posxIndex2 + 1);
+                    posyIndex1 = textStr.find(":");                
+                    posyIndex2 = textStr.find(",");
+                    posySize = distance (textStr.begin() + posyIndex1 + 2, textStr.begin() + posyIndex2);
+                    posyTemp = textStr.substr (posyIndex1 + 2, posySize);
+                    Shape_List.back()->setY(stof(posyTemp));
+
+                    // Identify radius
+                    textStr.erase(textStr.begin(), textStr.begin() + posyIndex2 + 1);
+                    size1Index1 = textStr.find(":");                
+                    size1Index2 = textStr.find("}");
+                    size1Size = distance (textStr.begin() + size1Index1 + 2, textStr.begin() + size1Index2 - 8);
+                    size1Temp = textStr.substr (size1Index1 + 2, size1Size);
+                    Shape_List.back()->setSize1(stof(size1Temp));
+
+                    // End
+                    textStr.erase(textStr.begin(), textStr.begin() + size1Index2 + 2);
+					cout << "textStr con lai sau khi doc Circle la:" << textStr << endl << endl;
+					break;
+            }
+
+			case 'S':                                                   // Square
+            {
+                    Shape_List.push_back (FactoryShape::createShape(2));
+
+                    // Identify name
+                    textStr.erase(textStr.begin(), textStr.begin() + typeIndex2 + 1);
+                    nameIndex1 = textStr.find(":");                
+                    nameIndex2 = textStr.find(",");
+                    nameSize = distance (textStr.begin() + nameIndex1 + 3, textStr.begin() + nameIndex2 - 1);
+                    nameTemp = textStr.substr (nameIndex1 + 3, nameSize);
+                    Shape_List.back()->setName(nameTemp);
+
+                    // Identify pos x
+                    textStr.erase(textStr.begin(), textStr.begin() + nameIndex2 + 1);
+                    posxIndex1 = textStr.find(":");                
+                    posxIndex2 = textStr.find(",");
+                    posxSize = distance (textStr.begin() + posxIndex1 + 2, textStr.begin() + posxIndex2);
+                    posxTemp = textStr.substr (posxIndex1 + 2, posxSize);
+                    Shape_List.back()->setX(stof(posxTemp));
+
+                    // Identify pos y
+                    textStr.erase(textStr.begin(), textStr.begin() + posxIndex2 + 1);
+                    posyIndex1 = textStr.find(":");                
+                    posyIndex2 = textStr.find(",");
+                    posySize = distance (textStr.begin() + posyIndex1 + 2, textStr.begin() + posyIndex2);
+                    posyTemp = textStr.substr (posyIndex1 + 2, posySize);
+                    Shape_List.back()->setY(stof(posyTemp));
+
+                    // Identify radius
+                    textStr.erase(textStr.begin(), textStr.begin() + posyIndex2 + 1);
+                    size1Index1 = textStr.find(":");                
+                    size1Index2 = textStr.find("}");
+                    size1Size = distance (textStr.begin() + size1Index1 + 2, textStr.begin() + size1Index2 - 8);
+                    size1Temp = textStr.substr (size1Index1 + 2, size1Size);
+                    Shape_List.back()->setSize1(stof(size1Temp));
+
+                    // End
+                    textStr.erase(textStr.begin(), textStr.begin() + size1Index2 + 2);
+					cout << "textStr con lai sau khi doc Square la:" << textStr << endl << endl;
+					break;
+            }
+
+			case 'R':                                                   // Rectangle
+            {
+                    Shape_List.push_back (FactoryShape::createShape(3));
+
+                    // Identify name
+                    textStr.erase(textStr.begin(), textStr.begin() + typeIndex2 + 1);
+                    nameIndex1 = textStr.find(":");                
+                    nameIndex2 = textStr.find(",");
+                    nameSize = distance (textStr.begin() + nameIndex1 + 3, textStr.begin() + nameIndex2 - 1);
+                    nameTemp = textStr.substr (nameIndex1 + 3, nameSize);
+                    Shape_List.back()->setName(nameTemp);
+
+                    // Identify pos x
+                    textStr.erase(textStr.begin(), textStr.begin() + nameIndex2 + 1);
+                    posxIndex1 = textStr.find(":");                
+                    posxIndex2 = textStr.find(",");
+                    posxSize = distance (textStr.begin() + posxIndex1 + 2, textStr.begin() + posxIndex2);
+                    posxTemp = textStr.substr (posxIndex1 + 2, posxSize);
+                    Shape_List.back()->setX(stof(posxTemp));
+
+                    // Identify pos y
+                    textStr.erase(textStr.begin(), textStr.begin() + posxIndex2 + 1);
+                    posyIndex1 = textStr.find(":");                
+                    posyIndex2 = textStr.find(",");
+                    posySize = distance (textStr.begin() + posyIndex1 + 2, textStr.begin() + posyIndex2);
+                    posyTemp = textStr.substr (posyIndex1 + 2, posySize);
+                    Shape_List.back()->setY(stof(posyTemp));
+
+                    // Identify length
+                    textStr.erase(textStr.begin(), textStr.begin() + posyIndex2 + 1);
+                    size1Index1 = textStr.find(":");                
+                    size1Index2 = textStr.find(",");
+                    size1Size = distance (textStr.begin() + size1Index1 + 2, textStr.begin() + size1Index2);
+                    size1Temp = textStr.substr (size1Index1 + 2, size1Size);
+                    Shape_List.back()->setSize1(stof(size1Temp));
+
+                    // Identify width
+                    textStr.erase(textStr.begin(), textStr.begin() + size1Index2 + 1);
+                    size2Index1 = textStr.find(":");                
+                    size2Index2 = textStr.find("}");
+                    size2Size = distance (textStr.begin() + size2Index1 + 2, textStr.begin() + size2Index2 - 8);
+                    size2Temp = textStr.substr (size2Index1 + 2, size2Size);
+                    Shape_List.back()->setSize2(stof(size2Temp));
+
+                    // End
+                    textStr.erase(textStr.begin(), textStr.begin() + size2Index2 + 2);
+					cout << "textStr con lai sau khi doc Rectangle la:" << textStr << endl << endl;
+                    break;
+            }
+
+			case 'T':                                                   // Triangle
+            {
+                    Shape_List.push_back (FactoryShape::createShape(4));
+
+                    // Identify name
+                    textStr.erase(textStr.begin(), textStr.begin() + typeIndex2 + 1);
+                    nameIndex1 = textStr.find(":");                
+                    nameIndex2 = textStr.find(",");
+                    nameSize = distance (textStr.begin() + nameIndex1 + 3, textStr.begin() + nameIndex2 - 1);
+                    nameTemp = textStr.substr (nameIndex1 + 3, nameSize);
+                    Shape_List.back()->setName(nameTemp);
+
+                    // Identify pos x
+                    textStr.erase(textStr.begin(), textStr.begin() + nameIndex2 + 1);
+                    posxIndex1 = textStr.find(":");                
+                    posxIndex2 = textStr.find(",");
+                    posxSize = distance (textStr.begin() + posxIndex1 + 2, textStr.begin() + posxIndex2);
+                    posxTemp = textStr.substr (posxIndex1 + 2, posxSize);
+                    Shape_List.back()->setX(stof(posxTemp));
+
+                    // Identify pos y
+                    textStr.erase(textStr.begin(), textStr.begin() + posxIndex2 + 1);
+                    posyIndex1 = textStr.find(":");                
+                    posyIndex2 = textStr.find(",");
+                    posySize = distance (textStr.begin() + posyIndex1 + 2, textStr.begin() + posyIndex2);
+                    posyTemp = textStr.substr (posyIndex1 + 2, posySize);
+                    Shape_List.back()->setY(stof(posyTemp));
+
+                    // Identify bottom
+                    textStr.erase(textStr.begin(), textStr.begin() + posyIndex2 + 1);
+                    size1Index1 = textStr.find(":");                
+                    size1Index2 = textStr.find(",");
+                    size1Size = distance (textStr.begin() + size1Index1 + 2, textStr.begin() + size1Index2);
+                    size1Temp = textStr.substr (size1Index1 + 2, size1Size);
+                    Shape_List.back()->setSize1(stof(size1Temp));
+
+                    // Identify height
+                    textStr.erase(textStr.begin(), textStr.begin() + size1Index2 + 1);
+                    size2Index1 = textStr.find(":");                
+                    size2Index2 = textStr.find("}");
+                    size2Size = distance (textStr.begin() + size2Index1 + 2, textStr.begin() + size2Index2 - 8);
+                    size2Temp = textStr.substr (size2Index1 + 2, size2Size);
+                    Shape_List.back()->setSize2(stof(size2Temp));
+
+                    // End
+                    textStr.erase(textStr.begin(), textStr.begin() + size2Index2 + 2);
+                    cout << "textStr con lai sau khi doc Triangle la " << textStr << endl << endl;
+                    break;                    
+            }
+
+			case 'E':                                                   // Ellipse
+            {
+                    Shape_List.push_back (FactoryShape::createShape(5));
+
+                    // Identify name
+                    textStr.erase(textStr.begin(), textStr.begin() + typeIndex2 + 1);
+                    nameIndex1 = textStr.find(":");                
+                    nameIndex2 = textStr.find(",");
+                    nameSize = distance (textStr.begin() + nameIndex1 + 3, textStr.begin() + nameIndex2 - 1);
+                    nameTemp = textStr.substr (nameIndex1 + 3, nameSize);
+                    Shape_List.back()->setName(nameTemp);
+
+                    // Identify pos x
+                    textStr.erase(textStr.begin(), textStr.begin() + nameIndex2 + 1);
+                    posxIndex1 = textStr.find(":");                
+                    posxIndex2 = textStr.find(",");
+                    posxSize = distance (textStr.begin() + posxIndex1 + 2, textStr.begin() + posxIndex2);
+                    posxTemp = textStr.substr (posxIndex1 + 2, posxSize);
+                    Shape_List.back()->setX(stof(posxTemp));
+
+                    // Identify pos y
+                    textStr.erase(textStr.begin(), textStr.begin() + posxIndex2 + 1);
+                    posyIndex1 = textStr.find(":");                
+                    posyIndex2 = textStr.find(",");
+                    posySize = distance (textStr.begin() + posyIndex1 + 2, textStr.begin() + posyIndex2);
+                    posyTemp = textStr.substr (posyIndex1 + 2, posySize);
+                    Shape_List.back()->setY(stof(posyTemp));
+
+                    // Identify minor
+                    textStr.erase(textStr.begin(), textStr.begin() + posyIndex2 + 1);
+                    size1Index1 = textStr.find(":");                
+                    size1Index2 = textStr.find(",");
+                    size1Size = distance (textStr.begin() + size1Index1 + 2, textStr.begin() + size1Index2);
+                    size1Temp = textStr.substr (size1Index1 + 2, size1Size);
+                    Shape_List.back()->setSize1(stof(size1Temp));
+
+                    // Identify major
+                    textStr.erase(textStr.begin(), textStr.begin() + size1Index2 + 1);
+                    size2Index1 = textStr.find(":");                
+                    size2Index2 = textStr.find("}");
+                    size2Size = distance (textStr.begin() + size2Index1 + 2, textStr.begin() + size2Index2 - 8);
+                    size2Temp = textStr.substr (size2Index1 + 2, size2Size);
+                    Shape_List.back()->setSize2(stof(size2Temp));
+
+                    // End
+                    textStr.erase(textStr.begin(), textStr.begin() + size2Index2 + 2);
+                    cout << "textStr sau khi doc Ellipse la " << textStr << endl << endl;
+                    break;                    
+            }
+		}
+    }
+    fileIn.close();
+    //showShape(Shape_List);
+};
+
 class Graph
 {
-    protected:
+    public:
         // Declare the vector of the Shape class (contains a pointer)
-        vector <Shape*> ShapeList;
+         vector <Shape*> ShapeList;
 
     public:
         // Constructor function
@@ -526,12 +869,23 @@ class Graph
                         break;
                     }
 
+                    case 5:
+                    {
+                        readShape (inFile, ShapeList);
+                        cout << "Successfully read file!" << endl;
+                        break;
+                    }
+
+                    case 6:
+                        break; 
+
                     default:
                         cout << "Enter number from 1 to 6!" << endl;
                         break;
                 }
+                //break;
             };
-        };
+        };    
 };
 
 int main()
